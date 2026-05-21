@@ -24,5 +24,4 @@ front/vue-project/dist/
 Thumbs.db
 desktop.ini
 
-# SQL dumps (contain sensitive data)
-*.sql
+# SQL dumps are included for backup
