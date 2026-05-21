@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Press+Start+2P&display=swap');
+
+:root {
+  /* Мудборд: Midnight Deepslate */
+  --bg-deep: #0b0f19;
+  --bg-light: #161d2d;
+  
+  --mc-diamond: #00e5ff;
+  --mc-emerald: #00e676;
+  --mc-gold: #ffc400;
+
+  --surface: rgba(22, 29, 45, 0.7);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  
+  --text-main: #f0f4f8;
+  --text-muted: #8b9bb4;
+
+  --font-main: 'Outfit', sans-serif;
+  --font-pixel: 'Press Start 2P', cursive;
+  
+  --radius-lg: 20px;
+  --radius-md: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-main);
+  color: var(--text-main);
+  background: radial-gradient(circle at top, var(--bg-light) 0%, var(--bg-deep) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+button, input, select { font-family: var(--font-main); outline: none; }
+a { text-decoration: none; color: inherit; }
+
+.container { width: min(1200px, calc(100% - 40px)); margin: 0 auto; }
+.pixel-img { image-rendering: pixelated; }
+.section-title { font-size: 36px; font-weight: 800; margin: 0 0 12px; line-height: 1.2; }
+.section-subtitle { font-size: 16px; color: var(--text-muted); margin-bottom: 24px; }
+
+/* Темное матовое стекло */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.soft-block {
+  background: linear-gradient(145deg, rgba(30,39,56,0.9) 0%, rgba(20,26,40,0.9) 100%);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.soft-block:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+}
+.soft-block.emerald:hover { border-color: var(--mc-emerald); box-shadow: 0 15px 30px rgba(0, 230, 118, 0.15); }
+.soft-block.diamond:hover { border-color: var(--mc-diamond); box-shadow: 0 15px 30px rgba(0, 229, 255, 0.15); }
+
+/* Премиальные кнопки */
+.soft-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 50px; padding: 0 28px;
+  border: none; border-radius: var(--radius-md);
+  font-weight: 700; font-size: 15px;
+  cursor: pointer; transition: 0.2s;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.soft-button:hover { transform: translateY(-2px); }
+.soft-button:active { transform: translateY(1px); }
+
+.soft-button.primary {
+  background: var(--mc-emerald); color: #003314;
+  box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+}
+.soft-button.primary:hover { box-shadow: 0 0 30px rgba(0, 230, 118, 0.5); background: #00ff84;}
+
+.soft-button.secondary {
+  background: rgba(255,255,255,0.05); color: var(--text-main);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.soft-button.secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--mc-diamond); color: var(--mc-diamond); }
+
+.input-soft, .select-soft {
+  width: 100%; height: 50px; border-radius: var(--radius-md);
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+  padding: 0 16px; color: var(--text-main); font-size: 15px;
+}
+.input-soft:focus, .select-soft:focus { border-color: var(--mc-diamond); background: rgba(0,0,0,0.4); }

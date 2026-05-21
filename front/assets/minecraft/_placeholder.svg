@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <!-- Заглушка вместо minecraft-картинки если не скачали ассеты.
+       Стилизована под пиксельный розовый-чёрный "missing texture" из Minecraft. -->
+  <rect x="0" y="0" width="8" height="8" fill="#f800f8"/>
+  <rect x="8" y="0" width="8" height="8" fill="#000"/>
+  <rect x="0" y="8" width="8" height="8" fill="#000"/>
+  <rect x="8" y="8" width="8" height="8" fill="#f800f8"/>
+</svg>

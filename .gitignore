@@ -1,0 +1,28 @@
+# Backend
+back/vendor/
+back/node_modules/
+back/.env
+back/storage/logs/*.log
+back/storage/framework/cache/data/*
+back/storage/framework/views/*.php
+back/storage/framework/sessions/*
+back/bootstrap/cache/*.php
+
+# Frontend
+front/vue-project/node_modules/
+front/vue-project/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# SQL dumps (contain sensitive data)
+*.sql
