@@ -1,0 +1,61 @@
+# ===== Secrets / credentials (NEVER commit) =====
+.env
+*.env
+back/.env
+back/.env.*
+!back/.env.example
+.ssh_run.ps1
+.ssh_scp.ps1
+*.pem
+*.key
+*.ppk
+
+# ===== Operational / deployment scripts (contain live creds) =====
+set_smtp.sh
+set_smtp2.sh
+free_ram.sh
+wipe_servers.sh
+start_srv.sh
+start_fabric.sh
+swap_vane.sh
+fix_java21.sh
+fix_fabric_install.sh
+fix_fabric_install_v2.sh
+fix_fabric_real_version.sh
+check_eggs.sh
+check_props.sh
+check_ram.sh
+wait_install.sh
+seed_mods.sh
+import_egg.php
+import_fabric_egg.sh
+smtp_test.php
+
+# ===== Database dumps / sensitive data =====
+*.sql
+crafthost_dump.sql
+live_hashes.txt
+
+# ===== Dependencies / build output =====
+node_modules/
+back/vendor/
+front/vue-project/dist/
+front/assets/
+front/index.html
+front/favicon.ico
+
+# Laravel storage / cache
+back/storage/*.key
+back/storage/framework/cache/*
+back/storage/framework/sessions/*
+back/storage/framework/views/*
+back/storage/logs/*
+back/bootstrap/cache/*.php
+
+# ===== OS / editor =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+.claude/

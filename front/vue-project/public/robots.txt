@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Allow: /pricing
+Allow: /order
+Allow: /faq
+Allow: /login
+Allow: /register
+
+# Личный кабинет и админка — не индексируем
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /servers/
+Disallow: /tickets/
+Disallow: /api/
+
+# Запрещаем сканировать ассеты-картинки чаще нужного
+Crawl-delay: 1
+
+Sitemap: https://crafthost.ru/sitemap.xml

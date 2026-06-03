@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" shape-rendering="crispEdges">
+  <!-- Фон с лёгким градиентом -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c1117"/>
+      <stop offset="1" stop-color="#0a0d12"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00e676"/>
+      <stop offset="1" stop-color="#00ff84"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Блоки слева как декор -->
+  <g transform="translate(80,360)">
+    <rect x="0"   y="0"   width="90" height="90" fill="#0fa84a"/>
+    <rect x="0"   y="30"  width="90" height="6"  fill="#0a7a36"/>
+    <rect x="0"   y="36"  width="90" height="54" fill="#7a4a2a"/>
+    <rect x="-2"  y="-2"  width="94" height="94" fill="none" stroke="#00e676" stroke-width="3"/>
+  </g>
+
+  <g transform="translate(220,420) rotate(8)">
+    <rect x="0"   y="0"   width="70" height="70" fill="#a8a8a8"/>
+    <rect x="-2"  y="-2"  width="74" height="74" fill="none" stroke="#00e676" stroke-width="2.5"/>
+  </g>
+
+  <g transform="translate(1010,80) rotate(-12)">
+    <rect x="0"   y="0"   width="80" height="80" fill="#5cdcff"/>
+    <rect x="-2"  y="-2"  width="84" height="84" fill="none" stroke="#00e676" stroke-width="3"/>
+  </g>
+
+  <!-- Логотип / заголовок -->
+  <g transform="translate(80,140)">
+    <text x="0" y="0" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="120" font-weight="900" fill="#ffffff">Craft<tspan fill="url(#green)">Host</tspan></text>
+    <text x="0" y="80" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="42" font-weight="500" fill="#8b9bb4">Хостинг Minecraft-серверов</text>
+  </g>
+
+  <!-- Преимущества -->
+  <g transform="translate(80,290)" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="28" fill="#cdd5e1">
+    <text x="0"   y="0">★ Pterodactyl, NVMe-диски и DDoS-защита</text>
+    <text x="0"   y="42">★ Vanilla, Paper, Forge, Fabric — установка в один клик</text>
+    <text x="0"   y="84">★ Оплата по дням, бэкапы, поддержка 24/7</text>
+  </g>
+
+  <!-- Цена-плашка -->
+  <g transform="translate(880,470)">
+    <rect x="0" y="0" width="240" height="80" rx="16" fill="#00e676"/>
+    <text x="120" y="52" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="34" font-weight="800" fill="#003314">от 5 ₽ / день</text>
+  </g>
+</svg>
