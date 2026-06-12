@@ -108,6 +108,9 @@
             <button v-if="server.status !== 'deleted'" class="soft-button secondary small renew-link" @click="openRenewModal(server)">
               ↻ Продлить
             </button>
+            <button v-if="server.status !== 'deleted'" class="soft-button secondary small danger-link" @click="deleteOwnServer(server)" :disabled="deletingServerId === server.id">
+              {{ deletingServerId === server.id ? '…' : '🗑 Удалить' }}
+            </button>
           </div>
 
           <!-- Модалка продления (инлайн внутри карточки) -->
@@ -337,6 +340,7 @@
     </div>
 
     <!-- ============ МОДАЛ: ПОПОЛНЕНИЕ ============ -->
+    <Teleport to="body">
     <div v-if="showTopupModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content glass">
         <h3 class="modal-title">Пополнение баланса</h3>
@@ -363,6 +367,7 @@
         </div>
       </div>
     </div>
+    </Teleport>
 
     <!-- ============ ВКЛАДКА: АДМИНИСТРАТОР ============ -->
     <div v-if="activeTab === 'admin' && isAdmin">
@@ -447,10 +452,10 @@
         <div v-if="loadingAdminServers" style="color:var(--text-muted);padding:20px 0;">Загрузка...</div>
         <div v-else>
           <div class="admin-table">
-            <div class="admin-table-header" style="grid-template-columns: 60px 1fr 1fr 1fr 100px 180px;">
+            <div class="admin-table-header" style="grid-template-columns: 60px 1fr 1fr 1fr 100px 230px;">
               <span>ID</span><span>Юзер</span><span>Тариф</span><span>Адрес</span><span>Статус</span><span>Действия</span>
             </div>
-            <div v-for="s in adminServers" :key="s.id" class="admin-table-row" style="grid-template-columns: 60px 1fr 1fr 1fr 100px 180px;">
+            <div v-for="s in adminServers" :key="s.id" class="admin-table-row" style="grid-template-columns: 60px 1fr 1fr 1fr 100px 230px;">
               <span>#{{ s.id }}</span>
               <span>{{ s.user?.email }}</span>
               <span>{{ s.tariff?.name }}</span>
@@ -460,6 +465,7 @@
                 <button @click="openChangeTariff(s)" class="soft-button secondary" style="height:28px;padding:0 10px;font-size:11px;">Тариф</button>
                 <button v-if="s.status === 'active'" @click="adminSuspendServer(s.id)" class="soft-button secondary" style="height:28px;padding:0 10px;font-size:11px;">Suspend</button>
                 <button v-else-if="s.status === 'suspended'" @click="adminUnsuspendServer(s.id)" class="soft-button primary" style="height:28px;padding:0 10px;font-size:11px;">Unsuspend</button>
+                <button v-if="s.status !== 'deleted'" @click="adminDeleteServer(s)" class="soft-button secondary" style="height:28px;padding:0 10px;font-size:11px;color:#ff5555;">Удалить</button>
               </span>
             </div>
           </div>
@@ -578,7 +584,11 @@
           </div>
           <div v-for="t in adminTariffs" :key="t.id" class="admin-table-row" style="grid-template-columns: 60px 1fr 90px 90px 90px 90px 100px 100px;">
             <span>#{{ t.id }}</span>
-            <span><strong>{{ t.name }}</strong></span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <img v-if="t.image" :src="t.image" alt="" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;">
+              <strong>{{ t.name }}</strong>
+              <span v-if="t.is_popular" title="Популярный" style="color:var(--mc-gold);">★</span>
+            </span>
             <span>{{ (t.ram_mb / 1024).toFixed(1) }}GB</span>
             <span>{{ t.cpu_percent }}%</span>
             <span>{{ (t.disk_mb / 1024).toFixed(1) }}GB</span>
@@ -731,12 +741,33 @@
       </div>
     </div>
 
+    <!-- ===== Админские модалки выносим в <body>, чтобы перекрывали хедер/футер ===== -->
+    <Teleport to="body">
     <!-- ============ МОДАЛ: РЕДАКТИРОВАНИЕ ТАРИФА ============ -->
     <div v-if="showTariffModal" class="modal-overlay" @click.self="showTariffModal = false">
       <div class="modal-content glass">
         <h3 class="modal-title">{{ tariffForm.id ? 'Тариф #' + tariffForm.id : 'Новый тариф' }}</h3>
         <div style="display:flex;flex-direction:column;gap:14px;">
           <label class="form-label"><span>Название</span><input v-model="tariffForm.name" class="input-soft" placeholder="Diamond"></label>
+          <label class="form-label"><span>Подзаголовок</span><input v-model="tariffForm.tagline" class="input-soft" placeholder="Для крупных проектов"></label>
+          <label class="form-label"><span>Описание</span><textarea v-model="tariffForm.description" class="input-soft" rows="2" placeholder="Краткое описание тарифа для страницы Тарифы"></textarea></label>
+          <label class="form-label"><span>Особенности (по одной в строке)</span><textarea v-model="tariffForm.featuresText" class="input-soft" rows="3" placeholder="Forge / Fabric сборки&#10;Десятки модов&#10;Поддержка 24/7"></textarea></label>
+
+          <div class="form-label">
+            <span>Картинка тарифа</span>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <img v-if="tariffForm.image" :src="tariffForm.image" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:10px;background:rgba(0,0,0,0.25);padding:4px;">
+              <input type="file" accept="image/*" @change="onTariffImage" style="font-size:12px;color:var(--text-muted);">
+              <button v-if="tariffForm.image" type="button" @click="tariffForm.image = ''" class="soft-button secondary" style="height:30px;padding:0 12px;font-size:11px;">Убрать</button>
+            </div>
+            <small style="color:var(--text-muted);font-size:11px;">PNG/JPG/SVG, до 600 КБ. Если не задать — подставится иконка по названию.</small>
+          </div>
+
+          <label class="form-label" style="flex-direction:row;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" v-model="tariffForm.is_popular" style="width:18px;height:18px;">
+            <span style="margin:0;">Отметить как «Популярный» (выделяется на странице Тарифы)</span>
+          </label>
+
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <label class="form-label"><span>RAM (MB)</span><input v-model.number="tariffForm.ram_mb" type="number" class="input-soft"></label>
             <label class="form-label"><span>CPU (%)</span><input v-model.number="tariffForm.cpu_percent" type="number" class="input-soft"></label>
@@ -1068,6 +1099,7 @@
         </div>
       </div>
     </div>
+    </Teleport>
 
   </div>
 </template>
@@ -1079,6 +1111,7 @@ import { useRouter } from 'vue-router'
 import api from '../api/axios'
 import { useAuthStore } from '../stores/auth'
 import { useToast } from '../utils/toast'
+import { copyToClipboard } from '../utils/clipboard'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -1121,6 +1154,23 @@ const fetchServers = async () => {
   try { const r = await api.get('/servers'); servers.value = r.data }
   catch { showToast('Ошибка загрузки серверов', 'error') }
   finally { loadingServers.value = false }
+}
+
+// Удаление собственного сервера пользователем
+const deletingServerId = ref(null)
+const deleteOwnServer = async (server) => {
+  if (!confirm(`Удалить сервер «${server.tariff?.name || ''}» #${server.id}?\n\nВесь мир и файлы будут безвозвратно удалены. Это действие нельзя отменить.`)) return
+  if (!confirm('Вы уверены? Восстановить сервер и его данные будет невозможно.')) return
+  deletingServerId.value = server.id
+  try {
+    await api.delete(`/servers/${server.id}`)
+    showToast('Сервер удалён', 'success')
+    await fetchServers()
+  } catch (e) {
+    showToast(e.response?.data?.error || 'Не удалось удалить сервер', 'error')
+  } finally {
+    deletingServerId.value = null
+  }
 }
 
 // Polling пока есть сервера в pending/provisioning
@@ -1366,16 +1416,18 @@ const generateRefCode = async () => {
   } finally { isGenerating.value = false }
 }
 
-const copyRefLink = () => {
-  navigator.clipboard.writeText(refLink.value)
+const copyRefLink = async () => {
+  const ok = await copyToClipboard(refLink.value)
+  if (!ok) { showToast('Не удалось скопировать', 'error'); return }
   copied.value = true
   setTimeout(() => (copied.value = false), 2000)
 }
 
 const copiedCode = ref(false)
-const copyRefCode = () => {
+const copyRefCode = async () => {
   if (!referralData.value?.code) return
-  navigator.clipboard.writeText(referralData.value.code)
+  const ok = await copyToClipboard(referralData.value.code)
+  if (!ok) { showToast('Не удалось скопировать', 'error'); return }
   copiedCode.value = true
   setTimeout(() => (copiedCode.value = false), 2000)
 }
@@ -1469,7 +1521,11 @@ const loadingAdminServers = ref(false)
 // Тарифы (админ)
 const adminTariffs = ref([])
 const showTariffModal = ref(false)
-const tariffForm = ref({ id: null, name: '', ram_mb: 1024, cpu_percent: 100, disk_mb: 10240, slots: 10, price_day: 10 })
+const blankTariff = () => ({
+  id: null, name: '', tagline: '', description: '', featuresText: '', image: '', is_popular: false,
+  ram_mb: 1024, cpu_percent: 100, disk_mb: 10240, slots: 10, price_day: 10
+})
+const tariffForm = ref(blankTariff())
 
 // Промокоды
 const adminPromos = ref([])
@@ -1732,6 +1788,11 @@ const adminUnsuspendServer = async (id) => {
   try { await api.post(`/admin/servers/${id}/unsuspend`); showToast('Unsuspended', 'success'); fetchAdminServers() }
   catch (e) { showToast(e.response?.data?.error || 'Ошибка', 'error') }
 }
+const adminDeleteServer = async (s) => {
+  if (!confirm(`Удалить сервер #${s.id} (${s.user?.email || ''})?\nСервер будет удалён в Pterodactyl без возможности восстановления.`)) return
+  try { await api.delete(`/admin/servers/${s.id}`); showToast('Сервер удалён', 'success'); fetchAdminServers() }
+  catch (e) { showToast(e.response?.data?.error || 'Ошибка удаления', 'error') }
+}
 
 // ---- Тикеты (админ) ----
 const adminTickets = ref([])
@@ -1853,16 +1914,53 @@ const fetchAdminTariffs = async () => {
 }
 
 const openTariffEdit = (t) => {
-  tariffForm.value = t
-    ? { ...t }
-    : { id: null, name: '', ram_mb: 1024, cpu_percent: 100, disk_mb: 10240, slots: 10, price_day: 10 }
+  if (t) {
+    tariffForm.value = {
+      ...t,
+      tagline: t.tagline || '',
+      description: t.description || '',
+      image: t.image || '',
+      is_popular: !!t.is_popular,
+      featuresText: Array.isArray(t.features) ? t.features.join('\n') : '',
+    }
+  } else {
+    tariffForm.value = blankTariff()
+  }
   showTariffModal.value = true
 }
 
+// Загрузка картинки тарифа → data-URL (без отдельного storage; работает по http)
+const onTariffImage = (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) { showToast('Нужен файл-картинка', 'error'); return }
+  if (file.size > 600 * 1024) { showToast('Картинка слишком большая (макс. 600 КБ)', 'error'); e.target.value = ''; return }
+  const reader = new FileReader()
+  reader.onload = () => { tariffForm.value.image = String(reader.result) }
+  reader.onerror = () => showToast('Не удалось прочитать файл', 'error')
+  reader.readAsDataURL(file)
+  e.target.value = ''
+}
+
 const saveTariff = async () => {
+  if (!tariffForm.value.name?.trim()) { showToast('Укажите название тарифа', 'error'); return }
+  const payload = {
+    name: tariffForm.value.name.trim(),
+    tagline: tariffForm.value.tagline?.trim() || null,
+    description: tariffForm.value.description?.trim() || null,
+    features: (tariffForm.value.featuresText || '')
+      .split('\n').map(s => s.trim()).filter(Boolean),
+    image: tariffForm.value.image || null,
+    is_popular: !!tariffForm.value.is_popular,
+    ram_mb: tariffForm.value.ram_mb,
+    cpu_percent: tariffForm.value.cpu_percent,
+    disk_mb: tariffForm.value.disk_mb,
+    slots: tariffForm.value.slots,
+    price_day: tariffForm.value.price_day,
+  }
   try {
-    if (tariffForm.value.id) await api.put(`/admin/tariffs/${tariffForm.value.id}`, tariffForm.value)
-    else await api.post('/admin/tariffs', tariffForm.value)
+    if (tariffForm.value.id) await api.put(`/admin/tariffs/${tariffForm.value.id}`, payload)
+    else await api.post('/admin/tariffs', payload)
     showToast('Сохранено', 'success'); showTariffModal.value = false; fetchAdminTariffs()
   } catch (e) { showToast(e.response?.data?.message || 'Ошибка', 'error') }
 }
@@ -2251,6 +2349,8 @@ onMounted(() => {
 .console-link:hover { background: rgba(0,229,255,0.1) !important; }
 .renew-link { color: var(--mc-gold) !important; border-color: rgba(255,196,0,0.25) !important; }
 .renew-link:hover { background: rgba(255,196,0,0.1) !important; }
+.danger-link { color: #ff5555 !important; border-color: rgba(255,85,85,0.25) !important; }
+.danger-link:hover { background: rgba(255,85,85,0.1) !important; }
 
 .renew-panel { margin-bottom: 16px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); border: 1px solid rgba(255,196,0,0.15); }
 .renew-row { display: flex; gap: 16px; align-items: flex-end; margin-bottom: 14px; }
@@ -2354,8 +2454,17 @@ onMounted(() => {
 .mt-4 { margin-top: 24px; display: inline-flex; }
 
 /* Модал */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 999; backdrop-filter: blur(5px); }
-.modal-content { width: 100%; max-width: 400px; padding: 30px; animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); }
+.modal-content {
+  width: 100%; max-width: 400px; padding: 30px;
+  max-height: 90vh; overflow-y: auto;
+  /* Непрозрачный фон — сквозь модалку ничего не просвечивает */
+  background: #0f151c;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 .modal-title { font-size: 24px; font-weight: 700; margin: 0 0 10px; }
 .modal-desc { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; }
 .topup-input-wrapper { position: relative; display: flex; align-items: center; }

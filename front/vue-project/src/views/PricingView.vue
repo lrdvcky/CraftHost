@@ -27,10 +27,10 @@
           <div v-if="isFeatured(i)" class="plan-ribbon">Популярный</div>
 
           <div class="plan-top">
-            <img :src="mcAsset(meta(t).icon)" class="plan-icon pixel-img" :alt="t.name">
+            <img :src="t.image || mcAsset(meta(t).icon)" class="plan-icon" :class="{ 'pixel-img': !t.image }" :alt="t.name">
             <div>
               <h3 class="plan-name">{{ t.name }}</h3>
-              <p class="plan-tag">{{ meta(t).tagline }}</p>
+              <p class="plan-tag">{{ t.tagline || meta(t).tagline }}</p>
             </div>
           </div>
 
@@ -47,10 +47,10 @@
             <li><span>Слотов</span><strong>{{ t.slots }} игроков</strong></li>
           </ul>
 
-          <p class="plan-desc">{{ meta(t).desc }}</p>
+          <p class="plan-desc">{{ t.description || meta(t).desc }}</p>
 
           <ul class="plan-features">
-            <li v-for="f in meta(t).features" :key="f">
+            <li v-for="f in (t.features && t.features.length ? t.features : meta(t).features)" :key="f">
               <img :src="mcAsset('Green_Dye_JE2_BE2.png')" class="pixel-img tick" alt="">
               {{ f }}
             </li>
@@ -125,7 +125,11 @@ const plans = ref([])
 const loading = ref(true)
 
 const gb = (mb) => (mb / 1024 % 1 === 0 ? mb / 1024 : (mb / 1024).toFixed(1))
-const isFeatured = (i) => plans.value.length >= 3 ? i === 1 : i === plans.value.length - 1
+const anyPopular = computed(() => plans.value.some(p => p.is_popular))
+const isFeatured = (i) => {
+  if (anyPopular.value) return !!plans.value[i]?.is_popular
+  return plans.value.length >= 3 ? i === 1 : i === plans.value.length - 1
+}
 
 // Описания по названию тарифа (в БД нет текстового описания — задаём на фронте).
 const metaMap = {

@@ -28,6 +28,12 @@ class TariffController extends Controller
     {
         $data = $request->validate([
             'name'        => 'required|string|max:100',
+            'tagline'     => 'nullable|string|max:160',
+            'description' => 'nullable|string|max:1000',
+            'features'    => 'nullable|array',
+            'features.*'  => 'string|max:200',
+            'image'       => 'nullable|string|max:2000000', // data-URL (~до 1.5 МБ файла)
+            'is_popular'  => 'boolean',
             'ram_mb'      => 'required|integer|min:128',
             'cpu_percent' => 'required|integer|min:10',
             'disk_mb'     => 'required|integer|min:512',
@@ -47,6 +53,12 @@ class TariffController extends Controller
 
         $data = $request->validate([
             'name'        => 'string|max:100',
+            'tagline'     => 'nullable|string|max:160',
+            'description' => 'nullable|string|max:1000',
+            'features'    => 'nullable|array',
+            'features.*'  => 'string|max:200',
+            'image'       => 'nullable|string|max:2000000',
+            'is_popular'  => 'boolean',
             'ram_mb'      => 'integer|min:128',
             'cpu_percent' => 'integer|min:10',
             'disk_mb'     => 'integer|min:512',

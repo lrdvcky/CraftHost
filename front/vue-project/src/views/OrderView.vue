@@ -21,7 +21,7 @@
             :class="{ active: form.tariff_id === tariff.id }"
           >
             <input type="radio" :value="tariff.id" v-model="form.tariff_id" @change="calculateQuote">
-            <img :src="getTariffIcon(tariff.name)" class="pixel-img" :alt="tariff.name">
+            <img :src="tariff.image || getTariffIcon(tariff.name)" :class="{ 'pixel-img': !tariff.image }" :alt="tariff.name">
             <div class="t-info">
               <strong>{{ tariff.name }} ({{ tariff.ram_mb / 1024 }}GB RAM)</strong>
               <span>{{ tariff.price_day }} ₽ / день</span>

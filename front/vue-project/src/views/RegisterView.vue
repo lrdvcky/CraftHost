@@ -22,8 +22,8 @@
           </label>
 
           <label class="form-label">
-            <span>Реферальный код (опционально)</span>
-            <input v-model="form.ref" type="text" class="input-soft" placeholder="DIAMOND123">
+            <span>Повторите пароль</span>
+            <input v-model="form.password_confirmation" type="password" class="input-soft" placeholder="••••••••" required minlength="8">
           </label>
 
           <button type="submit" class="soft-button primary w-full mt-2" :disabled="loading">
@@ -68,7 +68,7 @@ import api from '../api/axios'
 import { useToast } from '../utils/toast'
 
 const { showToast } = useToast()
-const form = ref({ email: '', password: '', ref: '' })
+const form = ref({ email: '', password: '', password_confirmation: '', ref: '' })
 const error = ref('')
 const loading = ref(false)
 const registered = ref(false)
@@ -79,7 +79,12 @@ const route = useRoute()
 onMounted(() => { if (route.query.ref) form.value.ref = route.query.ref })
 
 const handleRegister = async () => {
-  loading.value = true; error.value = ''
+  error.value = ''
+  if (form.value.password !== form.value.password_confirmation) {
+    error.value = 'Пароли не совпадают'
+    return
+  }
+  loading.value = true
   try {
     await authStore.register(form.value.email, form.value.password, form.value.ref)
     registered.value = true

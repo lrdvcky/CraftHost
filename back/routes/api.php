@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('servers')->group(function () {
         Route::get('/',               [ServerController::class, 'index']);
         Route::get('/{id}',           [ServerController::class, 'show']);
+        Route::delete('/{id}',        [ServerController::class, 'destroy']);
         Route::post('/{id}/power',    [ServerController::class, 'power']);
         Route::post('/{id}/command',  [ServerController::class, 'command']);
         Route::get('/{id}/console',   [ServerController::class, 'console']);

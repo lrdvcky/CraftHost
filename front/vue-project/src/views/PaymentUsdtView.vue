@@ -129,9 +129,33 @@ const timerText = computed(() => {
 })
 
 const copy = async (text) => {
+  const value = String(text ?? '').trim()
+  if (!value) { showToast('Нечего копировать', 'error'); return }
+
+  // Современный Clipboard API доступен только в защищённом контексте (https / localhost)
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(value)
+      showToast('Скопировано', 'success')
+      return
+    } catch { /* падаем в запасной вариант ниже */ }
+  }
+
+  // Запасной вариант для http:// — скрытая textarea + execCommand('copy')
   try {
-    await navigator.clipboard.writeText(text)
-    showToast('Скопировано', 'success')
+    const ta = document.createElement('textarea')
+    ta.value = value
+    ta.setAttribute('readonly', '')
+    ta.style.position = 'fixed'
+    ta.style.top = '-9999px'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.focus()
+    ta.select()
+    ta.setSelectionRange(0, value.length)
+    const ok = document.execCommand('copy')
+    document.body.removeChild(ta)
+    showToast(ok ? 'Скопировано' : 'Не удалось скопировать', ok ? 'success' : 'error')
   } catch {
     showToast('Не удалось скопировать', 'error')
   }

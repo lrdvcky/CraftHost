@@ -175,6 +175,36 @@ class ServerController extends Controller
         return response()->json(['message' => 'Карта пересоздаётся. Сервер будет перезагружен.']);
     }
 
+    /** DELETE /api/servers/{id} — пользователь удаляет СВОЙ сервер */
+    public function destroy(Request $request, $id, PterodactylService $ptero)
+    {
+        $server = $request->user()->servers()->findOrFail($id);
+
+        if ($server->status === 'deleted') {
+            return response()->json(['error' => 'Сервер уже удалён.'], 409);
+        }
+
+        // Удаляем сервер в Pterodactyl (необратимо — мир и файлы)
+        if ($server->ptero_server_id) {
+            try {
+                $ptero->deleteServer($server->ptero_server_id);
+            } catch (\Throwable $e) {
+                \Log::warning("User delete: failed to delete ptero server {$server->ptero_server_id}: " . $e->getMessage());
+            }
+        }
+
+        $server->update([
+            'status'          => 'deleted',
+            'ptero_server_id' => null,
+            'server_ip'       => null,
+            'server_port'     => null,
+        ]);
+
+        \App\Models\AuditLog::record('server.deleted_by_user', 'server', $server->id, ['user_id' => $request->user()->id]);
+
+        return response()->json(['message' => 'Сервер удалён.']);
+    }
+
     private function dispatchPowerSignal(Server $server, string $signal, PterodactylService $ptero)
     {
         if (!$server->ptero_server_id) {
